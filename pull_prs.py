@@ -14,6 +14,7 @@ def pull_prs(repo_url):
 
   def pull_reviewers(repo_url, pr_dict):
     reviewers_url = '{}/pulls/{}/requested_reviewers'.format(repo_url, pr_dict['number'])
+    headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
     requested_reviewers = requests.get(reviewers_url, auth=auth_, headers=headers).json()
     names = [d['login'] for d in requested_reviewers]
 
@@ -30,12 +31,10 @@ def pull_prs(repo_url):
   main_resp = requests.get('{}/pulls?state=open'.format(repo_url), auth=auth_)
   all_prs = json.loads(main_resp.content)
 
-  headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
-
-  for pr in all_prs:
-    if 'JesseAldridge' in pull_reviewers(repo_url, pr):
-      print repo_url
-
+  pr_url = 'https://github.com/gigwalk-corp/gigwalk_apps_platform_api/pull/{}'
+  for pr_dict in all_prs[::-1]:
+    if 'JesseAldridge' in pull_reviewers(repo_url, pr_dict):
+      print pr_url.format(pr_dict['number'])
 
 if __name__ == '__main__':
     pull_prs('https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api')
