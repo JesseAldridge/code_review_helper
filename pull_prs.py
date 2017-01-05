@@ -36,7 +36,8 @@ def pull_name_to_pr_nums(repo_url):
 
   name_to_pr_nums = {}
   for pr_dict in all_prs[::-1]:
-    for reviewer_name in pull_reviewers(pr_dict):
+    reviewer_names = pull_reviewers(pr_dict) or ['(No Reviewers Yet)']
+    for reviewer_name in reviewer_names:
       name_to_pr_nums.setdefault(reviewer_name, [])
       name_to_pr_nums[reviewer_name].append(pr_dict['number'])
 
