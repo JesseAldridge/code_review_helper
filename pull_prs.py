@@ -4,11 +4,11 @@ import json
 from requests import auth
 import requests
 
-import secrets
+import config
 
 
 def pull_name_to_pr_nums(repo_url):
-  auth_ = auth.HTTPBasicAuth(secrets.github_username, secrets.github_api_key)
+  auth_ = auth.HTTPBasicAuth(config.github_username, config.github_api_key)
 
   def pull_reviewers(pr_dict):
     reviewers_url = '{}/pulls/{}/requested_reviewers'.format(repo_url, pr_dict['number'])
