@@ -24,7 +24,11 @@ def pull_name_to_pr_nums(repo_url):
     line_comments_resp = requests.get(line_comments_url, auth=auth_)
     line_comments = json.loads(line_comments_resp.content)
 
-    return set([comment['user']['login'] for comment in comments + line_comments] + names)
+    pr_creator = pr_dict['user']['login']
+
+    names += [comment['user']['login'] for comment in comments + line_comments]
+
+    return set(names) - set([pr_creator])
 
 
   main_resp = requests.get('{}/pulls?state=open'.format(repo_url), auth=auth_)
@@ -42,6 +46,7 @@ def pull_name_to_pr_nums(repo_url):
 if __name__ == '__main__':
   repo_url = 'https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api'
   name_to_pr_nums = pull_name_to_pr_nums(repo_url)
+  print name_to_pr_nums
 
   assert len(name_to_pr_nums) > 0
   assert isinstance(name_to_pr_nums['JesseAldridge'][0], int)
