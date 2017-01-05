@@ -7,14 +7,13 @@ import requests
 import secrets
 
 
-def pull_prs(repo_url):
-  username = 'JesseAldridge'
-  auth_ = auth.HTTPBasicAuth(username, secrets.github_api_key)
+def pull_name_to_pr_nums(repo_url):
+  auth_ = auth.HTTPBasicAuth(secrets.github_username, secrets.github_api_key)
 
-
-  def pull_reviewers(repo_url, pr_dict):
+  def pull_reviewers(pr_dict):
     reviewers_url = '{}/pulls/{}/requested_reviewers'.format(repo_url, pr_dict['number'])
     headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
+    print 'pulling reviewers for:', reviewers_url
     requested_reviewers = requests.get(reviewers_url, auth=auth_, headers=headers).json()
     names = [d['login'] for d in requested_reviewers]
 
@@ -31,10 +30,18 @@ def pull_prs(repo_url):
   main_resp = requests.get('{}/pulls?state=open'.format(repo_url), auth=auth_)
   all_prs = json.loads(main_resp.content)
 
-  pr_url = 'https://github.com/gigwalk-corp/gigwalk_apps_platform_api/pull/{}'
+  name_to_pr_nums = {}
   for pr_dict in all_prs[::-1]:
-    if 'JesseAldridge' in pull_reviewers(repo_url, pr_dict):
-      print pr_url.format(pr_dict['number'])
+    for reviewer_name in pull_reviewers(pr_dict):
+      name_to_pr_nums.setdefault(reviewer_name, [])
+      name_to_pr_nums[reviewer_name].append(pr_dict['number'])
+
+  return name_to_pr_nums
+
 
 if __name__ == '__main__':
-    pull_prs('https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api')
+  repo_url = 'https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api'
+  name_to_pr_nums = pull_name_to_pr_nums(repo_url)
+
+  assert len(name_to_pr_nums) > 0
+  assert isinstance(name_to_pr_nums['JesseAldridge'][0], int)

@@ -1,0 +1,11 @@
+
+{% for name, pr_nums in name_to_pr_nums.iteritems() %}
+  <strong>{{name}}</strong>
+  <ul>
+    {% for pr_num in pr_nums %}
+      <li><a href="https://github.com/gigwalk-corp/gigwalk_apps_platform_api/pull/{{pr_num}}">https://github.com/gigwalk-corp/gigwalk_apps_platform_api/pull/{{pr_num}}</a></li>
+    {% endfor %}
+  </ul>
+{% endfor %}
+
+<div class='last_mod'>Last updated: {{last_mod_dt}}</div>
