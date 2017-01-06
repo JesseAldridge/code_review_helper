@@ -21,12 +21,18 @@ def pull_name_to_pr_nums(repo_url):
     comments = requests.get(comments_url, auth=auth_).json()
 
     line_comments_url = pr_dict['_links']['review_comments']['href']
-    line_comments_resp = requests.get(line_comments_url, auth=auth_)
-    line_comments = json.loads(line_comments_resp.content)
+    line_comments = requests.get(line_comments_url, auth=auth_).json()
 
     pr_creator = pr_dict['user']['login']
 
-    names += [comment['user']['login'] for comment in comments + line_comments]
+    try:
+      names += [comment['user']['login'] for comment in comments + line_comments]
+    except Exception as e:
+      print 'Exception!'
+      print 'comments:', comments
+      print 'line_comments:', line_comments
+      print 'names:', names
+      raise
 
     return set(names) - set([pr_creator])
 
@@ -37,6 +43,7 @@ def pull_name_to_pr_nums(repo_url):
   name_to_pr_nums = {}
   for pr_dict in all_prs[::-1]:
     reviewer_names = pull_reviewers(pr_dict) or ['(No Reviewers Yet)']
+
     for reviewer_name in reviewer_names:
       name_to_pr_nums.setdefault(reviewer_name, [])
       name_to_pr_nums[reviewer_name].append(pr_dict['number'])
