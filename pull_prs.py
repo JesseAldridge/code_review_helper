@@ -20,7 +20,7 @@ class GitHubAPI:
 
     for _ in range(10):
       resp = requests.get(url, auth=self.auth, headers=headers)
-      if resp.status_code == 403:
+      if int(resp.headers['x-ratelimit-remaining']) < 10:
         reset_time = resp.headers['X-RateLimit-Reset']
         print 'rate limit exceeded, sleeping for 60 seconds, reset_time:', reset_time
         time.sleep(60)
