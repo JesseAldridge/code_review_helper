@@ -10,4 +10,4 @@ while True:
   out_json = json.dumps(name_to_pr_nums, indent=2)
   with open(config.report_path, 'w') as f:
     f.write(out_json)
-  time.sleep(60)
+  time.sleep(10)

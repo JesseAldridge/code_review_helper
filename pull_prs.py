@@ -14,28 +14,36 @@ def pull_name_to_pr_nums(repo_url):
     reviewers_url = '{}/pulls/{}/requested_reviewers'.format(repo_url, pr_dict['number'])
     headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
     print 'pulling reviewers for:', reviewers_url
-    requested_reviewers = requests.get(reviewers_url, auth=auth_, headers=headers).json()
-    names = [d['login'] for d in requested_reviewers]
 
-    comments_url = pr_dict['_links']['comments']['href']
-    comments = requests.get(comments_url, auth=auth_).json()
+    for _ in range(10):
+      resp = requests.get(reviewers_url, auth=auth_, headers=headers)
 
-    line_comments_url = pr_dict['_links']['review_comments']['href']
-    line_comments = requests.get(line_comments_url, auth=auth_).json()
+      if resp.status_code == 403:
+        reset_time = resp.headers['X-RateLimit-Reset']
+        print 'rate limit exceeded, sleeping for 60 seconds, reset_time:', reset_time
+        time.sleep(60)
+        continue
 
-    pr_creator = pr_dict['user']['login']
+      print 'xrate-limit-remaining:', resp.headers['x-ratelimit-remaining']
+      requested_reviewers = resp.json()
+      names = [d['login'] for d in requested_reviewers]
 
-    try:
-      names += [comment['user']['login'] for comment in comments + line_comments]
-    except Exception as e:
-      print 'Exception!'
-      print 'comments:', comments
-      print 'line_comments:', line_comments
-      print 'names:', names
-      raise
+      comments_url = pr_dict['_links']['comments']['href']
+      comments = requests.get(comments_url, auth=auth_).json()
 
-    return set(names) - set([pr_creator])
+      line_comments_url = pr_dict['_links']['review_comments']['href']
+      line_comments = requests.get(line_comments_url, auth=auth_).json()
 
+      pr_creator = pr_dict['user']['login']
+      try:
+        names += [comment['user']['login'] for comment in comments + line_comments]
+      except Exception as e:
+        print 'Exception!'
+        print 'comments:', comments
+        print 'line_comments:', line_comments
+        print 'names:', names
+        raise
+      return set(names) - set([pr_creator])
 
   main_resp = requests.get('{}/pulls?state=open'.format(repo_url), auth=auth_)
   all_prs = json.loads(main_resp.content)
