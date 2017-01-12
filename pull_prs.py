@@ -24,6 +24,7 @@ class GitHubAPI:
         reset_time = resp.headers['X-RateLimit-Reset']
         print 'rate limit exceeded, sleeping for 60 seconds, reset_time:', reset_time
         time.sleep(60)
+        continue
       break
 
     print 'xrate-limit-remaining:', resp.headers['x-ratelimit-remaining']
