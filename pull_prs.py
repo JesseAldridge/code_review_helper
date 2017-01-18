@@ -12,6 +12,8 @@ class GitHubAPI:
     self.auth = auth.HTTPBasicAuth(config.github_username, config.github_api_key)
 
   def get(self, url):
+    time.sleep(1)
+
     headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
     repo_url = 'https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api'
 
