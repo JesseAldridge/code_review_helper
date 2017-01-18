@@ -20,14 +20,14 @@ class GitHubAPI:
 
     for _ in range(10):
       resp = requests.get(url, auth=self.auth, headers=headers)
-      if int(resp.headers['x-ratelimit-remaining']) < 10:
+      if int(resp.headers.get('x-ratelimit-remaining', 100)) < 10:
         reset_time = resp.headers['X-RateLimit-Reset']
         print 'rate limit exceeded, reset_time:', reset_time, 'curr time:', time.time()
         time.sleep(120)
         continue
       break
 
-    print 'xrate-limit-remaining:', resp.headers['x-ratelimit-remaining']
+    print 'xrate-limit-remaining:', resp.headers.get('x-ratelimit-remaining')
     return resp.json()
 
 
