@@ -23,7 +23,7 @@ class GitHubAPI:
       if int(resp.headers.get('x-ratelimit-remaining', 100)) < 10:
         reset_time = resp.headers['X-RateLimit-Reset']
         print 'rate limit exceeded, reset_time:', reset_time, 'curr time:', time.time()
-        time.sleep(120)
+        time.sleep(240)
         continue
       break
 
