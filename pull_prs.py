@@ -32,29 +32,6 @@ class GitHubAPI:
 
 
 def pull_name_to_pr_nums(repo_url, testing=False):
-  def pull_reviewers(pr_dict):
-    reviewers_url = 'pulls/{}/requested_reviewers'.format(pr_dict['number'])
-
-    requested_reviewers = api.get(reviewers_url)
-    names = [d['login'] for d in requested_reviewers]
-
-    comments_url = pr_dict['_links']['comments']['href']
-    comments = api.get(comments_url)
-
-    line_comments_url = pr_dict['_links']['review_comments']['href']
-    line_comments = api.get(line_comments_url)
-
-    pr_creator = pr_dict['user']['login']
-    try:
-      names += [comment['user']['login'] for comment in comments + line_comments]
-    except Exception as e:
-      print 'Exception!'
-      print 'comments:', comments
-      print 'line_comments:', line_comments
-      print 'names:', names
-      raise
-    return set(names) - set([pr_creator])
-
   api = GitHubAPI()
   all_prs = api.get('pulls?state=open')
 
@@ -78,7 +55,8 @@ def pull_name_to_pr_nums(repo_url, testing=False):
     for label_dict in api.get(labels_url):
       pr_num_to_labels[pr_dict['number']].append(label_dict)
 
-    reviewer_names = pull_reviewers(pr_dict) or ['(No Reviewers Yet)']
+    reviewer_names = ({d['login'] for d in pr_dict['assignees']} - {pr_dict['user']['login']} or
+                      {'(No Reviewers Yet)'})
     for reviewer_name in reviewer_names:
       name_to_pr_nums.setdefault(reviewer_name, [])
       name_to_pr_nums[reviewer_name].append(pr_dict['number'])
