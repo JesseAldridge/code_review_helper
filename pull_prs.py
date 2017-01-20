@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import json, time
+import json, time, traceback
 
 from requests import auth
 import requests
@@ -12,8 +12,6 @@ class GitHubAPI:
     self.auth = auth.HTTPBasicAuth(config.github_username, config.github_api_key)
 
   def get(self, url):
-    time.sleep(1)
-
     headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
     repo_url = 'https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api'
 
@@ -21,7 +19,13 @@ class GitHubAPI:
       url = '/'.join((repo_url, url))
 
     for _ in range(10):
-      resp = requests.get(url, auth=self.auth, headers=headers)
+      time.sleep(1)
+      try:
+        resp = requests.get(url, auth=self.auth, headers=headers)
+      except Exception as e:
+        print (u'exception: {}; {}'.format(type(e).__name__, e.message)).encode('utf8')
+        traceback.print_exc()
+        continue
       if int(resp.headers.get('x-ratelimit-remaining', 100)) < 10:
         reset_time = resp.headers['X-RateLimit-Reset']
         print 'rate limit exceeded, reset_time:', reset_time, 'curr time:', time.time()
