@@ -12,6 +12,8 @@ class GitHubAPI:
     self.auth = auth.HTTPBasicAuth(config.github_username, config.github_api_key)
 
   def get(self, url):
+    print 'getting:', url
+
     headers = {'accept': 'application/vnd.github.black-cat-preview+json'}
     repo_url = 'https://api.github.com/repos/gigwalk-corp/gigwalk_apps_platform_api'
 
@@ -21,6 +23,7 @@ class GitHubAPI:
     for _ in range(10):
       time.sleep(1)
       try:
+        print 'getting:', url
         resp = requests.get(url, auth=self.auth, headers=headers)
       except Exception as e:
         print (u'exception: {}; {}'.format(type(e).__name__, e.message)).encode('utf8')
@@ -36,9 +39,11 @@ class GitHubAPI:
     print 'xrate-limit-remaining:', resp.headers.get('x-ratelimit-remaining')
     return resp.json()
 
+api = GitHubAPI()
+
 
 def pull_name_to_pr_nums(repo_url, testing=False):
-  api = GitHubAPI()
+  print 'pulling all prs'
   all_prs = api.get('pulls?state=open')
 
   name_to_pr_nums = {}
