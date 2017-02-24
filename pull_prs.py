@@ -24,7 +24,7 @@ class GitHubAPI:
       time.sleep(1)
       try:
         print 'getting:', url
-        resp = requests.get(url, auth=self.auth, headers=headers)
+        resp = requests.get(url, auth=self.auth, headers=headers, timeout=10)
       except Exception as e:
         print (u'exception: {}; {}'.format(type(e).__name__, e.message)).encode('utf8')
         traceback.print_exc()
